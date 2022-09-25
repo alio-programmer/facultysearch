@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from .models import Application, CollegeProfile, Faculty, Jobcard
 from django.contrib.auth import login, logout, authenticate
+from django.db.models import Q
 # Create your views here.
 def colleges(request):
     college_object = CollegeProfile.objects.all()
@@ -154,3 +155,13 @@ def apply(request, pk):
         prod.save()
         return redirect('/')
     return render(request, "jobcards.html")
+
+def jobcardprofile(request, pk):
+    data = Jobcard.objects.get(id=pk)
+    applicants = Application.objects.filter(college=data.college)
+    return render(request, "jobcardprofile.html", {'obj':data, 'new_obj':applicants})
+
+def search(request):
+    query = request.GET['query']
+    producttitle = CollegeProfile.objects.filter(Q(name__icontains=query)| Q(location__icontains=query))
+    return render(request, "search.html", {'finalprod':producttitle})
